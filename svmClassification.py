@@ -10,7 +10,7 @@ file = "data.json"
 
 
 def spoof_type(s):
-    spoof = {'ClientRawface': 0, 'ImposterRawface': 1}
+    spoof = {'Real': 0, 'Spoof': 1}# add your own folders here.
     return spoof[s]
 
 
