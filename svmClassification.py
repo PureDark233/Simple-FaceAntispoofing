@@ -10,7 +10,7 @@ file = "data.json"
 
 
 def spoof_type(s):
-    spoof = {'Real': 0, 'Spoof': 1}# add your own folders here.
+    spoof = {'ClientRawface': 0, 'ImposterRawface': 1}
     return spoof[s]
 
 
@@ -24,7 +24,8 @@ with open(file, 'r')as f:
     list = json.load(f)
     data = np.array(list)
 for i in range(len(data)):
-    x, _ = (np.split(data[i], (768,), axis=0))
+    # print(data[i])
+    x, _ = (np.split(data[i], (1536,), axis=0))
 
     if data[i][-1] == 'train_all/real':
         x_train.append(x)
