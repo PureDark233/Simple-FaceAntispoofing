@@ -4,6 +4,7 @@ import numpy as np
 from skimage import feature
 import json
 import glob
+import tqdm
 
 
 def get_lbp_hist(channel):
@@ -18,26 +19,19 @@ def get_lbp_hist(channel):
 def make_lbp_data(folder):
     root = os.getcwd()
     data = []
-    t = 0
     imgdirs = glob.glob(
         os.path.join(root, folder, '*/*.jpg'))
-    for file in imgdirs:
-        t += 1
-        if t % 100 != 0:
-            continue
+    for file in tqdm.tqdm(imgdirs):
         if file.endswith('.jpg'):
             img = cv2.imread(file)
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            ycbcr = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
             h, s, v = cv2.split(hsv)
-            hmat, smat, vmat = np.array(h) / 180, np.array(s) / 255, np.array(v) / 255
-            h_hist, s_hist, v_hist = get_lbp_hist(hmat), get_lbp_hist(smat), get_lbp_hist(vmat)
-            totalhist = []
-            for i in h_hist[0]:
-                totalhist.append(i)
-            for i in s_hist[0]:
-                totalhist.append(i)
-            for i in v_hist[0]:
-                totalhist.append(i)
+            y, cb, cr = cv2.split(ycbcr)
+            h_hist, s_hist, v_hist = get_lbp_hist(np.array(h)), get_lbp_hist(np.array(s)), get_lbp_hist(np.array(v))
+            y_hist, cb_hist, cr_hist = get_lbp_hist(np.array(y)), get_lbp_hist(np.array(cb)), get_lbp_hist(np.array(cr))
+            totalhist = np.array([h_hist[0], s_hist[0], v_hist[0], y_hist[0], cb_hist[0], cr_hist[0]])
+            totalhist = totalhist.flatten().tolist()
             totalhist.append(folder)
             data.append(totalhist)
     return data
@@ -45,8 +39,8 @@ def make_lbp_data(folder):
 
 def getmulti():
     totaldata = []
-    while 1:
-        str = input("Enter the category, input 0 to stop\n")
+    for str in ('train_all/real', 'train_all/attack', 'test_all/real', 'test_all/attack'):
+        # str = input("Enter the category, input 0 to stop\n")
         if str == '0':
             break
         else:
@@ -57,6 +51,7 @@ def getmulti():
                     totaldata.append(i)
     with open('data.json', 'w') as f:
         json.dump(totaldata, f)
+        print('Done')
 
 
 getmulti()
